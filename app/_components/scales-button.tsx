@@ -50,6 +50,8 @@ export default function SerialComponent() {
                break;
             }
 
+            console.log(value)
+
             // Ensure the value is valid before decoding
             if (value) {
                const decodedData = decoder.decode(value);
