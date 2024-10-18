@@ -10,14 +10,13 @@ interface NavigatorSerial extends Navigator {
    };
 }
 
-
 export default function SerialComponent() {
    const [data, setData] = useState<string | null>(null);
    const [error, setError] = useState<string | null>(null);
 
    // Typing for SerialPort as it's not built-in
    interface MySerialPort extends SerialPort {
-      open: (options: { baudRate: number; dataBits: number; stopBits: number; parity: string, autoOpen?: boolean }) => Promise<void>;
+      open: (options: { baudRate: number; dataBits: number; stopBits: number; parity: string; autoOpen?: boolean }) => Promise<void>;
    }
 
    const connectToSerialPort = async () => {
@@ -28,10 +27,9 @@ export default function SerialComponent() {
          // Open the serial port with specific options
          await selectedPort.open({
             baudRate: 2400,
-            dataBits: 7,
+            dataBits: 8, // Changed to 8 as this is standard for RS232
             stopBits: 1,
             parity: 'none',
-            autoOpen: false
          });
 
          console.log('Port opened successfully!');
@@ -51,9 +49,15 @@ export default function SerialComponent() {
                console.log('Stream closed');
                break;
             }
-            const decodedData = decoder.decode(value);
-            setData((prevData) => (prevData ? prevData + decodedData : decodedData));
-            console.log('Data received:', decodedData);
+
+            // Ensure the value is valid before decoding
+            if (value) {
+               const decodedData = decoder.decode(value);
+               setData((prevData) => (prevData ? prevData + decodedData : decodedData));
+               console.log('Data received:', decodedData);
+            } else {
+               console.warn('Received empty value from the serial port.');
+            }
          }
 
          // Release the reader when done
