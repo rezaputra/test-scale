@@ -55,7 +55,7 @@ export default function SerialComponent() {
             // Ensure the value is valid before decoding
             if (value) {
                const decodedData = decoder.decode(value);
-               setData((prevData) => (prevData ? prevData + decodedData : decodedData));
+               setData(decodedData);
                console.log('Data received:', decodedData);
             } else {
                console.warn('Received empty value from the serial port.');

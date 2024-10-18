@@ -12,7 +12,8 @@
     "next": "14.2.15",
     "react": "^18",
     "react-dom": "^18",
-    "serialport": "^12.0.0"
+    "serialport": "^12.0.0",
+    "zustand": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",
