@@ -2,26 +2,36 @@
 
 import { useState } from 'react';
 
+// Extending the built-in Navigator interface to include the full 'serial' property
+interface NavigatorSerial extends Navigator {
+   serial: {
+      requestPort: () => Promise<SerialPort>;
+      getPorts: () => Promise<SerialPort[]>;
+   };
+}
+
+
 export default function SerialComponent() {
    const [data, setData] = useState<string | null>(null);
    const [error, setError] = useState<string | null>(null);
 
    // Typing for SerialPort as it's not built-in
    interface MySerialPort extends SerialPort {
-      open: (options: { baudRate: number; dataBits: number; stopBits: number; parity: string }) => Promise<void>;
+      open: (options: { baudRate: number; dataBits: number; stopBits: number; parity: string, autoOpen?: boolean }) => Promise<void>;
    }
 
    const connectToSerialPort = async () => {
       try {
-         // Requesting the user to select a serial port
-         const selectedPort: MySerialPort = await (navigator as any).serial.requestPort();
+         // Access the navigator object with extended serial type
+         const selectedPort: MySerialPort = await (navigator as NavigatorSerial).serial.requestPort();
 
-         // Opening the serial port with specific options
+         // Open the serial port with specific options
          await selectedPort.open({
             baudRate: 2400,
             dataBits: 7,
             stopBits: 1,
-            parity: 'none'
+            parity: 'none',
+            autoOpen: false
          });
 
          console.log('Port opened successfully!');
