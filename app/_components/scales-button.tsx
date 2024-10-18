@@ -6,20 +6,27 @@ export default function SerialComponent() {
    const [data, setData] = useState<string | null>(null);
    const [error, setError] = useState<string | null>(null);
 
+   // Typing for SerialPort as it's not built-in
+   interface MySerialPort extends SerialPort {
+      open: (options: { baudRate: number; dataBits: number; stopBits: number; parity: string }) => Promise<void>;
+   }
+
    const connectToSerialPort = async () => {
       try {
-         const selectedPort: SerialPort = await (navigator as unknown as { serial: { requestPort: () => Promise<SerialPort> } }).serial.requestPort();
+         // Requesting the user to select a serial port
+         const selectedPort: MySerialPort = await (navigator as any).serial.requestPort();
 
+         // Opening the serial port with specific options
          await selectedPort.open({
             baudRate: 2400,
             dataBits: 7,
             stopBits: 1,
-            parity: "none"
+            parity: 'none'
          });
 
          console.log('Port opened successfully!');
 
-
+         // Create a reader to read data from the serial port
          const reader = selectedPort.readable?.getReader();
          if (!reader) {
             throw new Error('The readable stream is not available.');
@@ -27,6 +34,7 @@ export default function SerialComponent() {
 
          const decoder = new TextDecoder();
 
+         // Reading data in a loop
          while (true) {
             const { value, done } = await reader.read();
             if (done) {
@@ -38,8 +46,13 @@ export default function SerialComponent() {
             console.log('Data received:', decodedData);
          }
 
+         // Release the reader when done
          reader.releaseLock();
-      } catch (err: unknown) { // Keep `unknown` for the error
+
+         // Close the serial port when done
+         await selectedPort.close();
+         console.log('Port closed');
+      } catch (err: unknown) { // Keep `unknown` for error type
          if (err instanceof Error) {
             setError('Error connecting to serial port: ' + err.message);
             console.error('Error:', err.message);
